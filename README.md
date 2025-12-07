@@ -73,7 +73,7 @@ GPT Killer는 총 10개의 언어적 특징을 기반으로 **0~10점(raw_score)
 
 ## 💡 GPT Killer 실행 데모 화면
 
-![사람 텍스트 데모 이미지](images/sample_human.png)
+![사람 텍스트 데모 이미지](images/sample_human.jpg)
 ![AI 텍스트 데모 이미지](images/sample_ai.jpg)
 
 ---

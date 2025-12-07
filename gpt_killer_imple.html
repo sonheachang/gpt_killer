@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>GPT Killer (한국어 전용)</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      padding: 24px;
+    }
+    .app {
+      width: 100%;
+      max-width: 960px;
+      background: #020617;
+      border-radius: 18px;
+      padding: 24px 28px 32px;
+      box-shadow: 0 18px 45px rgba(15,23,42,0.7);
+      border: 1px solid #1f2937;
+    }
+    .header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .title {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      color: #f97316;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: #9ca3af;
+    }
+    textarea {
+      width: 100%;
+      min-height: 220px;
+      resize: vertical;
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 14px;
+      line-height: 1.6;
+      outline: none;
+      transition: border 0.15s ease, box-shadow 0.15s ease;
+    }
+    textarea:focus {
+      border-color: #f97316;
+      box-shadow: 0 0 0 1px rgba(249,115,22,0.5);
+    }
+    .toolbar {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #6b7280;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 9px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 10px 25px rgba(249,115,22,0.35);
+      transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease;
+    }
+    button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+      box-shadow: 0 14px 30px rgba(249,115,22,0.45);
+    }
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 7px 18px rgba(249,115,22,0.25);
+    }
+    .main {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.1fr);
+      gap: 18px;
+    }
+    @media (max-width: 840px) {
+      .main {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+    .card {
+      border-radius: 16px;
+      border: 1px solid #1f2937;
+      background: radial-gradient(circle at top left, #111827 0, #020617 55%);
+      padding: 16px 18px 18px;
+    }
+    .card h2 {
+      font-size: 15px;
+      margin: 0 0 8px;
+      color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card small {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+    .score-line {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .score-main {
+      font-size: 28px;
+      font-weight: 700;
+      color: #f97316;
+    }
+    .score-sub {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 11px;
+      margin-top: 6px;
+      color: #e5e7eb;
+      background: rgba(15,118,110,0.25);
+      border: 1px solid rgba(45,212,191,0.5);
+    }
+    .pill.ai-high {
+      background: rgba(185,28,28,0.25);
+      border-color: rgba(248,113,113,0.7);
+    }
+    .pill.human-high {
+      background: rgba(21,128,61,0.25);
+      border-color: rgba(74,222,128,0.7);
+    }
+    .label {
+      font-size: 13px;
+      margin-top: 6px;
+    }
+    .label strong { color: #f97316; }
+    .reasons {
+      margin-top: 10px;
+      padding-left: 16px;
+      font-size: 12px;
+      color: #d1d5db;
+    }
+    .reasons li {
+      margin-bottom: 4px;
+    }
+    .stats-grid {
+      margin-top: 6px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px 12px;
+      font-size: 11px;
+      color: #9ca3af;
+    }
+    .stats-grid span.key {
+      color: #e5e7eb;
+    }
+    .footer-note {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div>
+        <div class="title">GPT Killer <span style="font-size:13px;color:#9ca3af;">· 한국어 텍스트 탐지 데모</span></div>
+        <div class="subtitle">
+          상단 박스에 텍스트를 붙여넣고 <b>“분석하기”</b>를 누르면, 통계적 패턴을 기반으로 AI·학생 작성 가능성을 점수로 보여줍니다.
+        </div>
+      </div>
+    </div>
+
+    <!-- 입력 영역 -->
+    <textarea id="inputText" placeholder="여기에 분석할 한국어 텍스트를 입력하거나 붙여넣으세요.&#10;&#10;예시) 이번 보고서를 작성하면서 여러 자료를 찾아보았다..."></textarea>
+
+    <div class="toolbar">
+      <span id="charCount">글자 수: 0</span>
+      <button id="analyzeBtn">
+        <span>분석하기</span>
+        <span>⚡</span>
+      </button>
+    </div>
+
+    <!-- 결과 영역 -->
+    <div class="main">
+      <div class="card" id="scoreCard">
+        <h2>AI 가능성 점수 <small>(0~100점)</small></h2>
+        <div class="score-line">
+          <span class="score-main" id="aiScore">–</span>
+          <span class="score-sub" id="rawScore">원시 점수: – / 10</span>
+        </div>
+        <div class="pill" id="labelPill" style="display:none;"></div>
+        <div class="label" id="labelText">아직 분석 결과가 없습니다. 텍스트를 입력한 뒤 “분석하기” 버튼을 눌러주세요.</div>
+        <ul class="reasons" id="reasonsList"></ul>
+      </div>
+
+      <div class="card">
+        <h2>텍스트 통계 요약</h2>
+        <div class="stats-grid" id="statsGrid">
+          <div><span class="key">글자 수:</span> –</div>
+          <div><span class="key">문장 수:</span> –</div>
+          <div><span class="key">단어 수:</span> –</div>
+          <div><span class="key">평균 문장 길이:</span> –</div>
+          <div><span class="key">평균 단어 길이:</span> –</div>
+          <div><span class="key">단어 다양도(TTR):</span> –</div>
+          <div><span class="key">Hapax 비율(HLR):</span> –</div>
+          <div><span class="key">전형적 연결어 개수:</span> –</div>
+          <div><span class="key">기능어 비율:</span> –</div>
+          <div><span class="key">1인칭 표현 비율:</span> –</div>
+          <div><span class="key">문장 길이 분산:</span> –</div>
+          <div><span class="key">반복 bigram 비율:</span> –</div>
+        </div>
+        <div class="footer-note">
+          ※ 이 도구는 <b>규칙 기반 스타일 분석</b>을 사용한 교육용 데모이며,<br/>
+          실제 부정행위 판정이나 공식적인 검증 용도로 사용할 수 없습니다.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const inputText = document.getElementById('inputText');
+    const charCount = document.getElementById('charCount');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+
+    const aiScoreEl = document.getElementById('aiScore');
+    const rawScoreEl = document.getElementById('rawScore');
+    const labelPill = document.getElementById('labelPill');
+    const labelText = document.getElementById('labelText');
+    const reasonsList = document.getElementById('reasonsList');
+    const statsGrid = document.getElementById('statsGrid');
+
+    // 글자 수 표시
+    inputText.addEventListener('input', () => {
+      charCount.textContent = `글자 수: ${inputText.value.length}`;
+    });
+
+    // ---- 텍스트 분석 로직 (Python 버전의 JS 포팅) ----
+
+    function splitSentences(text) {
+      const raw = text.trim().split(/[\.\?\!]\s+|\n+/);
+      return raw.map(s => s.trim()).filter(s => s.length > 0);
+    }
+
+    function tokenize(text) {
+      const matches = text.toLowerCase().match(/[a-z가-힣0-9]+/g);
+      return matches ? matches : [];
+    }
+
+    function computeBasicStats(text) {
+      const sentences = splitSentences(text);
+      const tokens = tokenize(text);
+
+      const nChars = text.length;
+      const nSents = sentences.length;
+      const nTokens = tokens.length;
+
+      const avgSentLen = nSents ? (nTokens / nSents) : 0;
+      const avgTokenLen = nTokens ? (tokens.reduce((s, t) => s + t.length, 0) / nTokens) : 0;
+
+      const uniqueTokens = new Set(tokens);
+      const ttr = nTokens ? (uniqueTokens.size / nTokens) : 0;
+
+      const freq = {};
+      for (const t of tokens) freq[t] = (freq[t] || 0) + 1;
+      let hapaxCount = 0;
+      for (const t in freq) if (freq[t] === 1) hapaxCount++;
+
+      const hapaxRate = nTokens ? (hapaxCount / nTokens) : 0;
+
+      return {
+        n_chars: nChars,
+        n_sentences: nSents,
+        n_tokens: nTokens,
+        avg_sentence_length: avgSentLen,
+        avg_token_length: avgTokenLen,
+        type_token_ratio: ttr,
+        hapax_legomena_rate: hapaxRate,
+        sentences,
+        tokens,
+        freq
+      };
+    }
+
+    function computePatternFeatures(text, tokens, sentences, freq) {
+      const nTokens = tokens.length;
+      const entries = Object.entries(freq).sort((a, b) => b[1] - a[1]);
+      const mostCommon = entries.slice(0, 10);
+
+      const top1Freq = (mostCommon[0] && nTokens) ? mostCommon[0][1] / nTokens : 0;
+      const top3Freq = nTokens ? mostCommon.slice(0, 3).reduce((s, [, c]) => s + c, 0) / nTokens : 0;
+
+      const transitionPhrasesKo = [
+        "결론적으로","요약하자면","전반적으로","종합하면","정리하자면",
+        "이 글에서는","첫째","둘째","셋째","마지막으로",
+        "이러한 점에서","이러한 측면에서","중요성을","관점에서 볼 때",
+        "한편","또한","더불어","따라서","그러므로"
+      ];
+      let tpCount = 0;
+      for (const p of transitionPhrasesKo) {
+        const reg = new RegExp(p, "g");
+        const matches = text.match(reg);
+        if (matches) tpCount += matches.length;
+      }
+
+      const functionWordsKo = [
+        "그리고","그러나","하지만","또한","그러므로","따라서",
+        "때문에","그래서","반면에","한편","혹은","또는","즉","예를","예를 들어"
+      ];
+      let fwCount = 0;
+      for (const w of functionWordsKo) {
+        if (freq[w]) fwCount += freq[w];
+      }
+      const functionWordRatio = nTokens ? (fwCount / nTokens) : 0;
+
+      const firstPerson = ["나","내가","제 생각에는","제가","우리가","우리"];
+      let fpCount = 0;
+      for (const p of firstPerson) {
+        const reg = new RegExp(p, "g");
+        const matches = text.match(reg);
+        if (matches) fpCount += matches.length;
+      }
+      const fpRatio = (sentences.length || 1) ? fpCount / (sentences.length || 1) : 0;
+
+      const sentLens = sentences.length
+        ? sentences.map(s => tokenize(s).length)
+        : [0];
+      const meanLen = sentLens.reduce((s, v) => s + v, 0) / sentLens.length;
+      const varLen = sentLens.reduce((s, v) => s + (v - meanLen) ** 2, 0) / sentLens.length;
+
+      const bigrams = [];
+      for (let i = 0; i < tokens.length - 1; i++) {
+        bigrams.push(tokens[i] + "||" + tokens[i + 1]);
+      }
+      const bgFreq = {};
+      for (const b of bigrams) bgFreq[b] = (bgFreq[b] || 0) + 1;
+      const bgKeys = Object.keys(bgFreq);
+      let repeatedBigrams = 0;
+      for (const b in bgFreq) if (bgFreq[b] >= 2) repeatedBigrams++;
+      const bigramRepeatRatio = bgKeys.length ? (repeatedBigrams / bgKeys.length) : 0;
+
+      return {
+        top1_freq: top1Freq,
+        top3_freq: top3Freq,
+        transition_phrase_count: tpCount,
+        function_word_ratio: functionWordRatio,
+        first_person_ratio_per_sentence: fpRatio,
+        sentence_length_variance: varLen,
+        bigram_repeat_ratio: bigramRepeatRatio,
+        most_common_tokens: mostCommon
+      };
+    }
+
+    function scoreAI(stats, patterns) {
+      let raw = 0;
+      const reasons = [];
+
+      if (stats.avg_sentence_length >= 18) {
+        raw += 2;
+        reasons.push("문장 길이가 전반적으로 길고 복잡한 편입니다.");
+      } else if (stats.avg_sentence_length >= 14) {
+        raw += 1;
+        reasons.push("문장 길이가 다소 긴 편입니다.");
+      }
+
+      if (stats.type_token_ratio >= 0.45) {
+        raw += 1;
+        reasons.push("단어 다양도가 높은 편입니다.");
+      }
+
+      if (stats.n_tokens >= 100 && stats.hapax_legomena_rate <= 0.30) {
+        raw += 1;
+        reasons.push("단 한 번만 등장하는 단어의 비율이 낮아 어휘가 다소 반복적인 경향을 보입니다.");
+      }
+
+      if (patterns.transition_phrase_count >= 5) {
+        raw += 2;
+        reasons.push("전형적인 연결어/클리셰/결론 표현이 많이 사용되었습니다.");
+      } else if (patterns.transition_phrase_count >= 2) {
+        raw += 1;
+        reasons.push("여러 전형적인 연결어/클리셰/결론 표현이 사용되었습니다.");
+      }
+
+      if (patterns.function_word_ratio >= 0.30 && stats.avg_sentence_length >= 14) {
+        raw += 1;
+        reasons.push("접속사/기능어 비율이 높고 문장 구조가 매우 정제된 편입니다.");
+      }
+
+      if (patterns.first_person_ratio_per_sentence <= 0.1) {
+        raw += 1;
+        reasons.push("1인칭 표현이 거의 사용되지 않았습니다.");
+      }
+
+      if (patterns.bigram_repeat_ratio >= 0.2) {
+        raw += 1;
+        reasons.push("유사한 어구(두 단어 조합)가 여러 번 반복됩니다.");
+      }
+
+      if (patterns.sentence_length_variance <= 15 && stats.avg_sentence_length >= 12) {
+        raw += 1;
+        reasons.push("문장 길이가 비교적 균일합니다.");
+      }
+
+      const maxRaw = 10;
+      const aiScore100 = Math.round((raw / maxRaw) * 100);
+
+      let label;
+      if (aiScore100 >= 70) {
+        label = "AI(예: GPT)가 작성했을 가능성이 높습니다.";
+      } else if (aiScore100 >= 40) {
+        label = "AI와 사람이 섞였거나, 어느 쪽인지 애매합니다.";
+      } else {
+        label = "학생(사람)이 작성했을 가능성이 높습니다.";
+      }
+
+      return { raw_score: raw, ai_score: aiScore100, label, reasons };
+    }
+
+    function updateUI(stats, patterns, result) {
+      // 점수/라벨
+      aiScoreEl.textContent = result.ai_score;
+      rawScoreEl.textContent = `원시 점수: ${result.raw_score} / 10`;
+      labelText.textContent = result.label;
+
+      labelPill.style.display = 'inline-flex';
+      labelPill.classList.remove('ai-high', 'human-high');
+      if (result.ai_score >= 70) {
+        labelPill.textContent = "AI 가능성 ↑";
+        labelPill.classList.add('ai-high');
+      } else if (result.ai_score < 40) {
+        labelPill.textContent = "학생 작성 가능성 ↑";
+        labelPill.classList.add('human-high');
+      } else {
+        labelPill.textContent = "판정 애매";
+      }
+
+      // 이유 리스트
+      reasonsList.innerHTML = "";
+      if (result.reasons.length === 0) {
+        const li = document.createElement('li');
+        li.textContent = "규칙 기반 특징 중 뚜렷하게 두드러지는 패턴이 발견되지 않았습니다.";
+        reasonsList.appendChild(li);
+      } else {
+        result.reasons.forEach(r => {
+          const li = document.createElement('li');
+          li.textContent = r;
+          reasonsList.appendChild(li);
+        });
+      }
+
+      // 통계 요약
+      const rows = statsGrid.children;
+      rows[0].innerHTML = `<span class="key">글자 수:</span> ${stats.n_chars}`;
+      rows[1].innerHTML = `<span class="key">문장 수:</span> ${stats.n_sentences}`;
+      rows[2].innerHTML = `<span class="key">단어 수:</span> ${stats.n_tokens}`;
+      rows[3].innerHTML = `<span class="key">평균 문장 길이:</span> ${stats.avg_sentence_length.toFixed(2)} 단어`;
+      rows[4].innerHTML = `<span class="key">평균 단어 길이:</span> ${stats.avg_token_length.toFixed(2)} 글자`;
+      rows[5].innerHTML = `<span class="key">단어 다양도(TTR):</span> ${stats.type_token_ratio.toFixed(3)}`;
+      rows[6].innerHTML = `<span class="key">Hapax 비율(HLR):</span> ${stats.hapax_legomena_rate.toFixed(3)}`;
+      rows[7].innerHTML = `<span class="key">전형적 연결어 개수:</span> ${patterns.transition_phrase_count}`;
+      rows[8].innerHTML = `<span class="key">기능어 비율:</span> ${patterns.function_word_ratio.toFixed(3)}`;
+      rows[9].innerHTML = `<span class="key">1인칭 표현 비율:</span> ${patterns.first_person_ratio_per_sentence.toFixed(3)}`;
+      rows[10].innerHTML = `<span class="key">문장 길이 분산:</span> ${patterns.sentence_length_variance.toFixed(2)}`;
+      rows[11].innerHTML = `<span class="key">반복 bigram 비율:</span> ${patterns.bigram_repeat_ratio.toFixed(3)}`;
+    }
+
+    analyzeBtn.addEventListener('click', () => {
+      const text = inputText.value.trim();
+      if (!text) {
+        alert("먼저 분석할 텍스트를 입력해주세요.");
+        return;
+      }
+      const stats = computeBasicStats(text);
+      const patterns = computePatternFeatures(text, stats.tokens, stats.sentences, stats.freq);
+      const result = scoreAI(stats, patterns);
+      updateUI(stats, patterns, result);
+    });
+  </script>
+</body>
+</html>

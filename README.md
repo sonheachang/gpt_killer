@@ -86,8 +86,7 @@ GPT Killer는 총 10개의 언어적 특징을 기반으로 **0~10점(raw_score)
 https://github.com/tbhb/vale-ai-tells
 - Chidimma Opara, **"StyloAI: Distinguishing AI-Generated Content"**, 2024
 - Kaplan et al., **"The Statistical Characteristics of AI-Generated Text"**, 2023
-- 국립국어원 기능어/접속사 자료  
-- 기타 한국어 텍스트 분석 관련 연구 및 오픈소스 참고
+- 국립국어원 기능어/접속사 자료
 
 > 해당 자료들은 모두 오픈소스로 공개되어 있으며,  
 > 본 프로젝트는 이를 참고자료로만 활용했습니다.
